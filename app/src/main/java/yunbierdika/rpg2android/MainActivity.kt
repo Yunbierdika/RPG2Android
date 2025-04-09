@@ -41,6 +41,87 @@ class MainActivity : ComponentActivity() {
         // 保持屏幕常亮
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+        // 初始化日志输出实例
+        writeLogToLocal = WriteLogToLocal(this)
+
+        // 初始化 WebView
+        gameWebView = WebView(this).apply {
+            // 启用WebView中的JavaScript支持
+            settings.javaScriptEnabled = true
+            // 启用DOM存储支持
+            settings.domStorageEnabled = true
+            // 允许媒体内容在没有用户手势的情况下自动播放
+            settings.mediaPlaybackRequiresUserGesture = false
+            // 允许WebView适应屏幕宽度（启用视口支持）
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            // 允许WebView访问本地文件
+            settings.allowFileAccess = true
+            // 设置缓存模式为本地缓存模式
+            settings.cacheMode = WebSettings.LOAD_CACHE_ONLY
+            // 设置WebView自动加载图片，即使页面中有图片资源，WebView也会自动加载并显示
+            settings.loadsImagesAutomatically = true
+            // 启用WebView的多窗口支持，允许WebView在打开新链接时支持多窗口显示
+            settings.setSupportMultipleWindows(true)
+            // 允许JavaScript自动打开新窗口，当页面中的JavaScript代码尝试打开新窗口时，WebView会自动处理
+            settings.javaScriptCanOpenWindowsAutomatically = true
+
+            // 设置WebView背景色默认为黑色
+            setBackgroundColor(Color.BLACK)
+            // 使用硬件加速
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            // 添加JavaScript接口
+            addJavascriptInterface(
+                JavaScriptInterface(this@MainActivity, writeLogToLocal),
+                "AndroidBridge"
+            )
+            // 使用 WebViewAssetLoader 代替已弃用的 allowUniversalAccessFromFileURLs 方法
+            val assetLoader = WebViewAssetLoader.Builder().addPathHandler("/assets/",
+                WebViewAssetLoader.AssetsPathHandler(this@MainActivity)).build()
+            webViewClient = object : WebViewClient() {
+                // 使用 WebViewAssetLoader
+                override fun shouldInterceptRequest(
+                    view: WebView?,
+                    request: WebResourceRequest
+                ): WebResourceResponse? {
+                    return assetLoader.shouldInterceptRequest(request.url)
+                }
+
+                // 捕获 WebView 错误
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    // 捕捉加载错误
+                    val errorMessage = "WebView Error: ${error?.description} URL: ${request?.url}"
+                    writeLogToLocal.logError(errorMessage)
+                }
+
+                // 捕获 HTTP 错误
+                override fun onReceivedHttpError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    errorResponse: WebResourceResponse?
+                ) {
+                    super.onReceivedHttpError(view, request, errorResponse)
+                    val errorMessage = "HTTP Error: ${errorResponse?.statusCode} URL: ${request?.url}"
+                    writeLogToLocal.logError(errorMessage)
+                }
+            }
+        }
+
+        setContentView(gameWebView)
+
+        // 仅在savedInstanceState为空时加载初始URL
+        if (savedInstanceState == null) {
+            // 加载游戏
+            gameWebView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
+        } else {
+            gameWebView.restoreState(savedInstanceState)
+        }
+
         // 创建 OnBackPressedCallback，拦截返回键误操作
         val callback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -58,83 +139,6 @@ class MainActivity : ComponentActivity() {
 
         // 将 callback 添加到 OnBackPressedDispatcher
         onBackPressedDispatcher.addCallback(this, callback)
-
-        // 仅在savedInstanceState为空时加载初始URL
-        if (savedInstanceState == null) {
-            // 初始化日志输出实例
-            writeLogToLocal = WriteLogToLocal(this)
-            // WebView 配置
-            gameWebView = WebView(this).apply {
-                // 启用WebView中的JavaScript支持
-                settings.javaScriptEnabled = true
-                // 启用DOM存储支持
-                settings.domStorageEnabled = true
-                // 允许媒体内容在没有用户手势的情况下自动播放
-                settings.mediaPlaybackRequiresUserGesture = false
-                // 允许WebView适应屏幕宽度（启用视口支持）
-                settings.useWideViewPort = true
-                settings.loadWithOverviewMode = true
-                // 允许WebView访问本地文件
-                settings.allowFileAccess = true
-                // 设置缓存模式为本地缓存模式
-                settings.cacheMode = WebSettings.LOAD_CACHE_ONLY
-                // 设置WebView自动加载图片，即使页面中有图片资源，WebView也会自动加载并显示
-                settings.loadsImagesAutomatically = true
-                // 启用WebView的多窗口支持，允许WebView在打开新链接时支持多窗口显示
-                settings.setSupportMultipleWindows(true)
-                // 允许JavaScript自动打开新窗口，当页面中的JavaScript代码尝试打开新窗口时，WebView会自动处理
-                settings.javaScriptCanOpenWindowsAutomatically = true
-
-                // 设置WebView背景色默认为黑色
-                setBackgroundColor(Color.BLACK)
-                // 使用硬件加速
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                // 添加JavaScript接口
-                addJavascriptInterface(
-                    JavaScriptInterface(this@MainActivity, writeLogToLocal),
-                    "AndroidBridge"
-                )
-                // 使用 WebViewAssetLoader 代替已弃用的 allowUniversalAccessFromFileURLs 方法
-                val assetLoader = WebViewAssetLoader.Builder().addPathHandler("/assets/",
-                    WebViewAssetLoader.AssetsPathHandler(this@MainActivity)).build()
-                webViewClient = object : WebViewClient() {
-                    // 使用 WebViewAssetLoader
-                    override fun shouldInterceptRequest(
-                        view: WebView?,
-                        request: WebResourceRequest
-                    ): WebResourceResponse? {
-                        return assetLoader.shouldInterceptRequest(request.url)
-                    }
-
-                    // 捕获 WebView 错误
-                    override fun onReceivedError(
-                        view: WebView?,
-                        request: WebResourceRequest?,
-                        error: WebResourceError?
-                    ) {
-                        super.onReceivedError(view, request, error)
-                        // 捕捉加载错误
-                        val errorMessage = "WebView Error: ${error?.description} URL: ${request?.url}"
-                        writeLogToLocal.logError(errorMessage)
-                    }
-
-                    // 捕获 HTTP 错误
-                    override fun onReceivedHttpError(
-                        view: WebView?,
-                        request: WebResourceRequest?,
-                        errorResponse: WebResourceResponse?
-                    ) {
-                        super.onReceivedHttpError(view, request, errorResponse)
-                        val errorMessage = "HTTP Error: ${errorResponse?.statusCode} URL: ${request?.url}"
-                        writeLogToLocal.logError(errorMessage)
-                    }
-                }
-                // 加载游戏
-                loadUrl("https://appassets.androidplatform.net/assets/index.html")
-            }
-        }
-
-        setContentView(gameWebView)
     }
 
     // 隐藏系统 UI
