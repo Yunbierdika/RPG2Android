@@ -9,9 +9,9 @@ android {
 
     defaultConfig {
         applicationId = "game.YourGameName"
-        minSdk = 30
+        minSdk = 23
         targetSdk = 35
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
