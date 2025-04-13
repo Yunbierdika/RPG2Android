@@ -47,7 +47,7 @@ android {
             isEnable = true
             reset()
             exclude("x86", "x86_64")
-            include("arm64_v8a")
+            include("arm64-v8a")
             isUniversalApk = false
         }
     }
