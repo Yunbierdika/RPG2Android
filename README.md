@@ -21,7 +21,3 @@
 3. 将 **_app/src/build.gradle.kts_** 中的 **applicationId = "game.YourGameName"** 改成你自己的游戏名称（英文）比如：**game.imotofantasy**，用于显示路径包名；将 **_app/src/main/res/values/strings.xml_** 中的 **YourGameName** 改成你自己的游戏名称，用于显示 App 的名称。
 
 4. 使用 Android Studio 打开项目，删除 **_app/src/main/res_** 目录下的 mipmap ，然后右键 **_app/src/main/res_** 点击 **“New -> Image Asset”** 添加你自己的游戏图标，图标的 **“Name”** 需要和 **_app/src/main/AndroidManifest.xml_** 中的 **“android:icon”**、**“android:roundIcon”** 一致。 最后编译即可。
-
-### 捐赠
-
-如果你希望这个项目，欢迎通过爱发电给我打赏：https://afdian.com/a/yun3812528
