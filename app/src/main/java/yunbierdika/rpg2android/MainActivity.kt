@@ -161,15 +161,15 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        // 停止加载内容
-        gameWebView.stopLoading()
-        gameWebView.loadUrl("about:blank")
-        // 清理历史和资源
-        gameWebView.clearHistory()
-        gameWebView.removeAllViews()
         // 销毁 WebView
-        gameWebView.destroy()
+        gameWebView.apply {
+            stopLoading()
+            loadUrl("about:blank")
+            clearHistory()
+            removeAllViews()
+            destroy()
+        }
+        super.onDestroy()
     }
 
     // 保存 WebView 状态，应对切换应用时刷新问题
