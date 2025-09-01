@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "yunbierdika.rpg2android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "game.YourGameName"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -27,8 +27,6 @@ android {
             )
         }
         debug {
-            isMinifyEnabled = true
-            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -36,11 +34,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     splits {
         abi {
